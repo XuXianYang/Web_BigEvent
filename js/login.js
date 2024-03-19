@@ -37,6 +37,7 @@ $(function () {
     // 注册提交事件
     $('.regBox .layui-form').on('submit',function(e){
         e.preventDefault()
+        /*
         $.ajax({
             type : 'POST',
             url : 'api/reguser',
@@ -52,6 +53,8 @@ $(function () {
                 regSuccess($('.regBox [name=username]').val().trim(),$('.regBox [name=password]').val().trim())
             }
         })
+        */
+        regSuccess($('.regBox [name=username]').val().trim(),$('.regBox [name=password]').val().trim())
     })
 
     // 注册成功，保存数据到本地代替后台服务器
@@ -64,6 +67,7 @@ $(function () {
      // 登录提交事件
      $('.loginBox .layui-form').on('submit',function(e){
         e.preventDefault()
+        /*
         $.ajax({
             type : 'POST',
             url : 'api/login',
@@ -76,9 +80,11 @@ $(function () {
             },
             error : function(res){
                 console.log('失败' + res);
-                loginSuccess($('.loginBox [name=username]').val().trim(),$('.loginBox [name=password]').val().trim())
             }
         })
+        */
+        loginSuccess($('.loginBox [name=username]').val().trim(),$('.loginBox [name=password]').val().trim())
+
     })
 
     // 登录处理，判断用户信息是否一致
@@ -86,6 +92,16 @@ $(function () {
         let localPwd = localStorage.getItem('user'+name)
         if(pwd === localPwd){
             layer.msg('登录成功')
+            
+            let userInfo = {
+                name :name,
+                pwd : pwd,
+            }
+            let userStr = JSON.stringify(userInfo)
+            console.log('登录存储' + userStr);
+
+            // 保存当前登录的用户信息
+            localStorage.setItem('userInfo',userStr)
             location.href = '../index.html'
         }else{
             layer.msg('登录失败，用户名或者密码错误')
