@@ -1,0 +1,52 @@
+
+*{
+    padding: 0;
+    margin: 0;
+}
+
+html,body{
+    height: 100%;
+    width: 100%;
+    /* 背景属性连写：no-repeat平铺方式 center位置 cover大小，覆盖 */
+    background: url(../assets/images/login_bg.jpg) no-repeat center center/cover;
+}
+
+.box{
+    width: 400px;
+    height: 310px;
+    background-color: #fff;
+    /* 使用绝对定位，和自身偏移居中 */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.login_title{
+    height: 60px;
+    background: url(../assets/images/login_title.png) no-repeat center center;
+}
+
+.layui-form{
+    padding: 0 30px;
+}
+
+.gotoreg,.gotoLogin{
+    display: flex;
+    justify-content: end;
+}
+
+.layui-form-item{
+    position: relative;
+}
+
+/* 使用绝对定位把字体图标放到文本框上 */
+.layui-icon{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.layui-form-item input{
+    padding-left: 30px;
+}
