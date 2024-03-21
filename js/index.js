@@ -1,6 +1,4 @@
 $(function () {
-
-  
     //获取用户信息
     function getUserInfo() {
         let userName = localStorage.getItem('userInfo')
@@ -25,11 +23,18 @@ $(function () {
     })
 })
 
+// 刷新首页，供子页面调用
 function reloadSelf(){
-    location.reload()
+    $('iframe[name=fm]').attr('src','../home/dashboard.html')
 }
 
+// 退出到登录页
 function loginOut(){
     localStorage.removeItem('userInfo')
     location.href = '../login.html'
+}
+
+// 设置头像
+function setIconHead(data){
+    $('.layui-nav-img').attr('src',data)
 }
