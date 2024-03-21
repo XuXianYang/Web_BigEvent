@@ -1,10 +1,11 @@
 $(function () {
 
-
+  
     //获取用户信息
     function getUserInfo() {
-        let userinfo = JSON.parse(localStorage.getItem('userInfo'))
-        console.log('用户信息' + userinfo);
+        let userName = localStorage.getItem('userInfo')
+        let userinfo = JSON.parse(localStorage.getItem(userName))
+
         $('.text-avatar').hide()
         if (userinfo) {
             $('#welcome').text('欢迎 ' + userinfo.name)
@@ -23,3 +24,12 @@ $(function () {
 
     })
 })
+
+function reloadSelf(){
+    location.reload()
+}
+
+function loginOut(){
+    localStorage.removeItem('userInfo')
+    location.href = '../login.html'
+}

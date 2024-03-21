@@ -59,9 +59,16 @@ $(function () {
 
     // 注册成功，保存数据到本地代替后台服务器
     function regSuccess(name,pwd){
-        localStorage.setItem('user'+name,pwd)
-        layer.msg('注册成功')
-        $('.gotoLogin').click()
+        let localUser = localStorage.getItem('user'+name)
+        if(localUser){
+            layer.msg('注册失败，用户名已存在')
+        }else{
+            let pwdStr = JSON.stringify({name:name,pwd:pwd})
+            localStorage.setItem('user'+name,pwdStr)
+            layer.msg('注册成功')
+            $('.regBox .layui-form')[0].reset()
+            $('.gotoLogin').click()
+        }
     }
 
      // 登录提交事件
@@ -90,21 +97,15 @@ $(function () {
     // 登录处理，判断用户信息是否一致
     function loginSuccess(name,pwd){
         let localPwd = localStorage.getItem('user'+name)
-        if(pwd === localPwd){
+        let localObj = JSON.parse(localPwd)
+        if(pwd === localObj.pwd){
             layer.msg('登录成功')
-            
-            let userInfo = {
-                name :name,
-                pwd : pwd,
-            }
-            let userStr = JSON.stringify(userInfo)
-            console.log('登录存储' + userStr);
-
             // 保存当前登录的用户信息
-            localStorage.setItem('userInfo',userStr)
+            localStorage.setItem('userInfo','user'+name)
             location.href = '../index.html'
         }else{
             layer.msg('登录失败，用户名或者密码错误')
-        }        
+        } 
+        $('.loginBox .layui-form')[0].reset()       
     }
 })
