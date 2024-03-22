@@ -30,7 +30,7 @@ $(function () {
             .cropper(options)        // 重新初始化裁剪区域
     })
 
-    layer = layui.layer
+    var layer = layui.layer
 
     // 点击确定上传文件
     $('.layui-btn-danger').on('click', function () {

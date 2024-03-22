@@ -98,7 +98,7 @@ $(function () {
     function loginSuccess(name,pwd){
         let localPwd = localStorage.getItem('user'+name)
         let localObj = JSON.parse(localPwd)
-        if(pwd === localObj.pwd){
+        if(localObj && pwd === localObj.pwd){
             layer.msg('登录成功')
             // 保存当前登录的用户信息
             localStorage.setItem('userInfo','user'+name)
