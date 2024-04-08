@@ -44,10 +44,24 @@ $(function () {
             // 将 Canvas 画布上的内容，转化为 base64 格式的字符串
             .toDataURL('image/png')
 
-            layer.msg('上传成功')
-            // 上传成功，渲染头像
-            window.parent.setIconHead(dataURL)
-            // 返回首页
-            window.parent.reloadSelf()
+        $.ajax({
+            method: 'POST',
+            url: 'my/update/avatar',
+            data: { avatar: dataURL },
+            success: function (res) {
+                if (res.status === 0) {
+                    layer.msg('上传成功')
+                    // 上传成功，渲染头像
+                    window.parent.setIconHead(dataURL)
+                    // 返回首页
+                    window.parent.reloadSelf()
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
+            }
+        })
     })
 })

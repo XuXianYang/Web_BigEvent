@@ -4,15 +4,23 @@ $(function () {
 
     getCateList()
 
-    // 获取缓存数据，渲染分类列表
+    // 获取数据，渲染分类列表
     function getCateList() {
-        let dataA = localStorage.getItem('cate')
-        let dataArr = []
-        if (dataA) {
-            dataArr = JSON.parse(dataA)
-            var htmlStr = template('cateList', { data: dataArr })
-            $('tbody').html(htmlStr)
-        }
+        $.ajax({
+            method: 'GET',
+            url: 'my/article/cates',
+            success: function (res) {
+                if (res.status === 0) {
+                    var htmlStr = template('cateList', { data: res.data })
+                    $('tbody').html(htmlStr)
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
+            }
+        })
     }
 
     // 添加分类点击事件
@@ -27,37 +35,35 @@ $(function () {
         })
     })
 
-    // 通过委托绑定表单提交事件
+    // 通过委托绑定表单提交事件,添加分类提交
     $('body').on('submit', '#form-add', function (e) {
         e.preventDefault()
-        let dataA = localStorage.getItem('cate')
-        let dataArr = []
-        if (dataA) {
-            dataArr = JSON.parse(dataA)
-        }
         let name = $('#form-add input[name=name]').val()
         let alias = $('#form-add input[name=alias]').val()
 
-        $.each(dataArr, function (index,item) {
-            if (item.name === name) {
-                return layer.msg('分类已添加')
+        $.ajax({
+            method: 'POST',
+            url: 'my/article/addCates',
+            data: { name: name, alias: alias },
+            success: function (res) {
+                if (res.status === 0) {
+                    layer.msg('文章分类添加成功')
+                    layer.close(addLayer)
+                    getCateList()
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
             }
         })
-        dataArr.push({ name: name, alias: alias })
-
-        let localD = JSON.stringify(dataArr)
-        localStorage.setItem('cate', localD)
-
-        layer.close(addLayer)
-        layer.msg('添加成功')
-        getCateList()
     })
 
     // 编辑事件
     let editLayer = null
     let cateIndex = 0
     $('body').on('click', '.btn-edit', function (e) {
-        var id = $(this).attr('data-id')
         // 打开页面弹出层
         editLayer = layer.open({
             type: 1,
@@ -65,55 +71,70 @@ $(function () {
             title: '修改文章分类',
             content: $('#dialog-edit').html()
         })
-        let cateObj = {}
-        let dataA = localStorage.getItem('cate')
-        let dataArr = JSON.parse(dataA)
-        $.each(dataArr, function (index,item) {
-            if (item.name === id) {
-                cateObj = item
-                cateIndex = index
+
+        // 根据id获取文章分类
+        var id = $(this).attr('data-id')
+        cateIndex = id
+        $.ajax({
+            method: 'GET',
+            url: `my/article/cates/${id}`,
+            success: function (res) {
+                if (res.status === 0) {
+                    $('#form-edit input[name=name]').val(res.data.name)
+                    $('#form-edit input[name=alias]').val(res.data.alias)
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
             }
         })
-        $('#form-edit input[name=name]').val(cateObj.name)
-        $('#form-edit input[name=alias]').val(cateObj.alias)
     })
 
+    // 编辑分类提交
     $('body').on('submit', '#form-edit', function (e) {
         e.preventDefault()
-        let dataA = localStorage.getItem('cate')
-        let dataArr = JSON.parse(dataA)
-        
         let name = $('#form-edit input[name=name]').val()
         let alias = $('#form-edit input[name=alias]').val()
 
-        $.each(dataArr, function (index,item) {
-            if (index !== cateIndex && name===item.name) {
-                return layer.msg('分类已添加')
+        $.ajax({
+            method: 'POST',
+            url: 'my/article/updatecate',
+            data: { Id: cateIndex, name: name, alias: alias },
+            success: function (res) {
+                if (res.status === 0) {
+                    layer.close(editLayer)
+                    layer.msg('修改成功')
+                    getCateList()
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
             }
-        })        
-        dataArr[cateIndex] = { name: name, alias: alias }
-       
-        let localD = JSON.stringify(dataArr)
-        localStorage.setItem('cate', localD)
-
-        layer.close(editLayer)
-        layer.msg('修改成功')
-        getCateList()
+        })
     })
+
+    // 删除文章分类
     $('body').on('click', '.btn-delete', function () {
         var id = $(this).attr('data-id')
 
-        let dataA = localStorage.getItem('cate')
-        let dataArr = JSON.parse(dataA)
-        $.each(dataArr, function (index,item) {
-            if (item && item.name === id) {
-                dataArr.splice(index,1)
+        $.ajax({
+            method: 'GET',
+            url: `my/article/deletecate/${id}`,
+            success: function (res) {
+                if (res.status === 0) {
+                    layer.msg('删除成功')
+                    getCateList()
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
             }
         })
-        let localD = JSON.stringify(dataArr)
-        localStorage.setItem('cate', localD)
-
-        layer.msg('删除成功')
-        getCateList()
     })
 })

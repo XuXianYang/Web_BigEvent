@@ -1,13 +1,22 @@
 $(function () {
     //获取用户信息
     function getUserInfo() {
-        let userName = localStorage.getItem('userInfo')
-        let userinfo = JSON.parse(localStorage.getItem(userName))
-
-        $('.text-avatar').hide()
-        if (userinfo) {
-            $('#welcome').text('欢迎 ' + userinfo.name)
-        }
+        $.ajax({
+            method: 'GET',
+            url: 'my/userinfo',
+            success: function (res) {
+                if (res.status === 0) {
+                    $('.text-avatar').hide()
+                    $('.layui-nav-img').attr('src', res.data.user_pic)
+                    $('#welcome').text('欢迎 ' + res.data.username)
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
+            }
+        })
     }
     getUserInfo()
 
@@ -15,7 +24,7 @@ $(function () {
     // 退出
     $('.loginOut').on('click', function () {
         layer.confirm('是否确认退出', { icon: 2, title: '温馨提示' }, function (index) {
-            localStorage.removeItem('userInfo')
+            localStorage.removeItem('token')
             location.href = '../login.html'
             layer.close(index);
         });
@@ -24,17 +33,17 @@ $(function () {
 })
 
 // 刷新首页，供子页面调用
-function reloadSelf(){
-    $('iframe[name=fm]').attr('src','../home/dashboard.html')
+function reloadSelf() {
+    $('iframe[name=fm]').attr('src', '../home/dashboard.html')
 }
 
 // 退出到登录页
-function loginOut(){
+function loginOut() {
     localStorage.removeItem('userInfo')
     location.href = '../login.html'
 }
 
 // 设置头像
-function setIconHead(data){
-    $('.layui-nav-img').attr('src',data)
+function setIconHead(data) {
+    $('.layui-nav-img').attr('src', data)
 }

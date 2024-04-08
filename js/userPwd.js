@@ -17,22 +17,31 @@ $(function () {
     })
 
     //提交
-    $(".layui-form").on('submit',function(e){
+    $(".layui-form").on('submit', function (e) {
         e.preventDefault()
-        let userName = localStorage.getItem('userInfo')
-        let userInfo = JSON.parse(localStorage.getItem(userName))
+
         let oldPwd = $('input[name=password]').val()
-        if(userInfo.pwd === oldPwd){
-            userInfo.pwd = $('input[name=newpassword]').val()
-            localStorage.setItem(userName, JSON.stringify(userInfo))
-            // 退出到登录页面
-            window.parent.loginOut()
-            layer.msg('密码修改成功')
-        }else{
-            alert('原密码错误，请重新输入')
-            $(this)[0].reset()
-        }
+        let newpwd = $('input[name=newpassword]').val()
+        $.ajax({
+            method: 'POST',
+            url: 'my/updatepwd',
+            data: { oldPwd: oldPwd, newPwd: newpwd },
+            success: function (res) {
+                if (res.status === 0) {
+                    // 退出到登录页面
+                    window.parent.loginOut()
+                    layer.msg('密码修改成功')
+                } else {
+                    layer.msg(res.message)
+                    $(this)[0].reset()
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
+                $(this)[0].reset()
+            }
+        })
     })
 })
 
-    
+

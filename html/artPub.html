@@ -26,7 +26,7 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">文章类别</label>
                     <div class="layui-input-block">
-                        <select name="cate" lay-verify="required" lay-filter="cateList">
+                        <select name="cate_id" lay-verify="required" lay-filter="cateList">
                         </select>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
     <script type="text/html" id="cateList">
         <option value=""></option>
         {{each data}}
-        <option value="{{$value}}">{{$value}}</option>
+        <option value="{{$value.Id}}">{{$value.name}}</option>
         {{/each}}
     </script>
     <script src="../assets/lib/jquery.js"></script>
@@ -78,6 +78,7 @@
     <!-- 富文本 -->
     <script src="../assets/lib/tinymce/tinymce.min.js"></script>
     <script src="../assets/lib/tinymce/tinymce_setup.js"></script>
+    <script src="../js/baseAIP.js"></script>
     <script src="../js/artPub.js"></script>
 
 </body>

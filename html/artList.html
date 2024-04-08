@@ -16,7 +16,7 @@
 
             <form class="layui-form" action="">
                 <div class="layui-form-item layui-inline">
-                    <select name="cate"></select>
+                    <select name="cate_id"></select>
                 </div>
                 <div class="layui-form-item layui-inline">
                     <select name="state">
@@ -56,13 +56,13 @@
         {{each data}}
         <tr>
             <td>{{$value.title}}</td>
-            <td>{{$value.cate}}</td>
-            <td>{{$value.time|dateFormat}}</td>
-            <td>{{$value.type}}</td>
+            <td>{{$value.cate_id|getCateValue}}</td>
+            <td>{{$value.pub_date|dateFormat}}</td>
+            <td>{{$value.state}}</td>
             <td>
-                <button type="button" class="layui-btn layui-btn-xs btnEdit" data-id="{{$value.time}}">编辑</button>
+                <button type="button" class="layui-btn layui-btn-xs btnEdit" data-id="{{$value.Id}}">编辑</button>
                 <button type="button" class="layui-btn layui-btn-danger layui-btn-xs btn-delete"
-                    data-id="{{$value.time}}">删除</button>
+                    data-id="{{$value.Id}}">删除</button>
             </td>
         </tr>
         {{/each}}
@@ -70,12 +70,13 @@
     <script type="text/html" id="cateList">
         <option value="">请选择文章分类</option>
         {{each data}}
-        <option value="{{$value}}">{{$value}}</option>
+        <option value="{{$value.Id}}">{{$value.name}}</option>
         {{/each}}
     </script>
     <script src="../assets/lib/jquery.js"></script>
     <script src="../assets/lib/template-web.js"></script>
     <script src="../assets/lib/layui/layui.all.js"></script>
+    <script src="../js/baseAIP.js"></script>
     <script src="../js/artList.js"></script>
 </body>
 

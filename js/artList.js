@@ -12,6 +12,19 @@ $(function () {
         state: '' // 文章的发布状态
     }
 
+    let cateList = []
+
+    // 把分类的id转化为name
+    template.defaults.imports.getCateValue = function (cateId) {
+        let name = ''
+        $.each(cateList, function (idx, item) {
+            if (item.Id === cateId) {
+                name = item.name
+            }
+        })
+        return name
+    }
+
     // 模板格式化时间
     template.defaults.imports.dateFormat = function (date) {
         if (!date) return '';
@@ -30,33 +43,54 @@ $(function () {
 
     // 获取分类列表
     function getCateList() {
-        let dataA = localStorage.getItem('cate')
-        let dataArr = JSON.parse(dataA)
-        let cateArr = []
-
-        $.each(dataArr, function (index, item) {
-            cateArr.push(item.name)
+        $.ajax({
+            method: 'GET',
+            url: 'my/article/cates',
+            success: function (res) {
+                if (res.status === 0) {
+                    cateList = res.data
+                    var htmlStr = template('cateList', { data: res.data })
+                    $('select[name=cate_id]').html(htmlStr)
+                    form.render('select');
+                    getArtList()
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
+            }
         })
-        var htmlStr = template('cateList', { data: cateArr })
-        $('select[name=cate]').html(htmlStr)
-        form.render('select');
     }
 
     let artList = []
     // 获取文章列表
     function getArtList() {
-        let dataA = localStorage.getItem('artList')
-        if (dataA) {
-            let dataArr = JSON.parse(dataA)
-            artList = dataArr
-            var htmlStr = template('artList', { data: dataArr })
-            $('tbody').html(htmlStr)
-            renderPage(dataArr.length)
-        }
+        $.ajax({
+            method: 'GET',
+            url: 'my/article/getArticle',
+            success: function (res) {
+                if (res.status === 0) {
+                    artList = res.data
+                    var htmlStr = template('artList', { data: res.data })
+                    $('tbody').html(htmlStr)
+
+                    if (artList.length === 1) {
+                        // 如果 len 的值等于1，证明删除完毕之后，页面上就没有任何数据了
+                        // 页码值最小必须是 1
+                        qobj.pagenum = qobj.pagenum === 1 ? 1 : qobj.pagenum - 1
+                    }
+                    renderPage(res.data.length)
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
+            }
+        })
     }
     getCateList()
-    getArtList()
-    localStorage.removeItem('editArt')
 
     // 定义渲染分页的方法
     //分页和列表无法联动，因为数据是死的，联动需要后台分页查回数据
@@ -94,60 +128,69 @@ $(function () {
     $('.layui-form').on('submit', function (e) {
         e.preventDefault()
         let newArr = []
-        let cate = $('select[name=cate]').val()
+        let cate = $('select[name=cate_id]').val()
         let state = $('select[name=state]').val()
-        $.each(artList, function (idx, item) {
-            let isCate = cate ? item.cate === cate : true
-            let isState = state ? item.type === state : true
-            if (isCate && isState) {
-                newArr.push(item)
-            }
-        })
+        if (cate && state) {
+            $.each(artList, function (idx, item) {
+                let isCate = parseInt(item.cate_id) === parseInt(cate)
+                let isState = item.state === state
+                if (isCate && isState) {
+                    newArr.push(item)
+                }
+            })
+        } else if (!cate && !state) {
+            newArr = artList
+        } else if (cate && !state) {
+            $.each(artList, function (idx, item) {
+                if (parseInt(item.cate_id) === parseInt(cate)) {
+                    newArr.push(item)
+                }
+            })
+        } else if (!cate && state) {
+            $.each(artList, function (idx, item) {
+                if (item.state === state) {
+                    newArr.push(item)
+                }
+            })
+        }
+
         var htmlStr = template('artList', { data: newArr })
         $('tbody').html(htmlStr)
+        renderPage(newArr.length)
     })
 
     // 删除
     $('.layui-table').on('click', '.btn-delete', function () {
         let id = $(this).attr('data-id')
-        let dataA = localStorage.getItem('artList')
-        let dataArr = JSON.parse(dataA)
-        $.each(dataArr, function (idx, item) {
-            if (item && id === item.time) {
-                dataArr.splice(idx, 1)
+        $.ajax({
+            method: 'GET',
+            url: `my/article/deleteArt/${id}`,
+            success: function (res) {
+                if (res.status === 0) {
+                    layer.msg('文章删除成功')
+                    getArtList()
+                } else {
+                    layer.msg(res.message)
+                }
+            },
+            error: function (res) {
+                layer.msg(res.message)
             }
         })
-
-        // 删除之后存入本地
-        let localList = JSON.stringify(dataArr)
-        localStorage.setItem('artList', localList)
-
-        if (dataArr.length === 1) {
-            // 如果 len 的值等于1，证明删除完毕之后，页面上就没有任何数据了
-            // 页码值最小必须是 1
-            qobj.pagenum = qobj.pagenum === 1 ? 1 : qobj.pagenum - 1
-        }
-        // 渲染列表
-        var htmlStr = template('artList', { data: dataArr })
-        $('tbody').html(htmlStr)
-        renderPage(dataArr.length)
     })
 
     // 编辑
     $('.layui-table').on('click', '.btnEdit', function () {
         let id = $(this).attr('data-id')
-        let dataA = localStorage.getItem('artList')
-        let dataArr = JSON.parse(dataA)
-        let obj = {}
-        $.each(dataArr, function (idx, item) {
-            if (id === item.time) {
-                obj = item
+        let objArt = {}
+        $.each(artList, function (idx, item) {
+            if (parseInt(item.Id) === parseInt(id)) {
+                objArt = item
             }
         })
-
-        let localList = JSON.stringify(obj)
-        localStorage.setItem('editArt', localList)
-
+        if(objArt){
+            localStorage.setItem('cacheArt',JSON.stringify(objArt))
+        }
         location.href = '../html/artPub.html'
     })
 })
